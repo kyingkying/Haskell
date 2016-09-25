@@ -31,7 +31,7 @@ exactMatches c1 c2 = length $ filter (\(x,y) -> x == y) $ zip c1 c2
 
 -- For each peg in xs, count how many times is occurs in ys
 countColors :: Code -> [Int]
-countColors c = map (\x -> (length x)-1) (groupBy (==) (sort (c ++ [Red, Green, Blue, Yellow, Orange, Purple])))
+countColors c = map (\x -> (length x)-1) (groupBy (==) (sort (c ++ colors)))
 
 -- Count number of matches between the actual code and the guess
 matches :: Code -> Code -> Int
@@ -41,28 +41,37 @@ matches actual guess = sum $ map (\(x,y)->(min x y)) $ zip (countColors actual) 
 
 -- Construct a Move from a guess given the actual code
 getMove :: Code -> Code -> Move
-getMove secret guess = let exactmatches = exactMatches secret guess in
-                         Move guess exactmatches ((matches secret guess) - exactmatches)
+getMove secret guess = Move guess exact nonexact
+                         where exact = exactMatches secret guess
+                               nonexact = (matches secret guess) - exact
 
 -- Exercise 4 -----------------------------------------
 
 isConsistent :: Move -> Code -> Bool
-isConsistent = undefined
+isConsistent (Move guess exact nonexact) code = (exact == exact2) && (nonexact == nonexact2)
+                                                  where (Move _ exact2 nonexact2) = getMove code guess 
 
 -- Exercise 5 -----------------------------------------
 
 filterCodes :: Move -> [Code] -> [Code]
-filterCodes = undefined
+filterCodes move codes = filter (\code -> isConsistent move code) codes
 
 -- Exercise 6 -----------------------------------------
 
 allCodes :: Int -> [Code]
-allCodes = undefined
+allCodes 1 = [[x] | x <- colors]
+allCodes n = concatMap (\x -> map (\y -> x ++ y ) (allCodes 1)) (allCodes (n-1))
 
 -- Exercise 7 -----------------------------------------
 
 solve :: Code -> [Move]
-solve = undefined
+solve secret = helper secret (allCodes $ length secret)
+
+helper :: Code -> [Code] -> [Move]
+helper _ [] = []
+helper _ (_:[]) = []
+helper secret (x:xs) = move : helper secret (filterCodes move (x:xs))
+                         where move = getMove secret x
 
 -- Bonus ----------------------------------------------
 
