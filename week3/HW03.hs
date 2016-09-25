@@ -83,7 +83,7 @@ evalSimple :: State -> DietStatement -> State
 evalSimple st stmt = case stmt of
                        DAssign s expr -> extend st s (evalE st expr)
                        DIf expr stmt1 stmt2 -> if evalE st expr == 1 then evalSimple st stmt1 else evalSimple st stmt2
-                       DWhile expr stmt1 -> if evalE st expr == 0 then evalSimple (evalSimple st stmt1) (DWhile expr stmt1) else st
+                       DWhile expr stmt1 -> if evalE st expr == 1 then evalSimple (evalSimple st stmt1) (DWhile expr stmt1) else st
                        DSequence stmt1 stmt2 -> evalSimple (evalSimple st stmt1) stmt2
                        DSkip -> st
 
