@@ -68,10 +68,10 @@ solve :: Code -> [Move]
 solve secret = helper secret (allCodes $ length secret)
 
 helper :: Code -> [Code] -> [Move]
-helper _ [] = []
-helper _ (_:[]) = []
-helper secret (x:xs) = move : helper secret (filterCodes move (x:xs))
-                         where move = getMove secret x
+helper secret codes
+  | length codes <= 1 = []
+  | otherwise = move : helper secret (filterCodes move codes)
+                  where move = getMove secret (head codes)
 
 -- Bonus ----------------------------------------------
 
